@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,4 +41,24 @@ class UserServiceTest {
         verify(repository).save(argThat(u -> u.getName().equals("John")));
     }
 
+    @Test
+    void testVoidMethods() {
+        doNothing().when(repository).deleteById(anyLong());
+        doThrow(new RuntimeException("DB Error")).when(repository).deleteById(999L);
+
+        service.deleteUser(5L);
+        assertThrows(RuntimeException.class, () -> service.deleteUser(999L));
+    }
+
+    @Test
+    void testAdvancedStubbing() {
+        when(repository.findById(1L))
+                .thenReturn(new User(1L, "First", "a@b.com"))
+                .thenThrow(new IllegalArgumentException("Not found"))
+                .thenAnswer(invocation -> new User(invocation.getArgument(0), "Dynamic", "dyn@email.com"));
+
+        assertEquals("First", service.getUserById(1L).getName());
+        assertThrows(IllegalArgumentException.class, () -> service.getUserById(1L));
+        assertEquals("Dynamic", service.getUserById(1L).getName());
+    }
 }
