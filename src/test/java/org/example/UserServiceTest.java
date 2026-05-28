@@ -2,9 +2,7 @@ package org.example;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,6 +18,9 @@ class UserServiceTest {
 
     @Spy
     private UserService spyService;
+
+    @Captor
+    private ArgumentCaptor<User> userCaptor;
 
     @InjectMocks
     private UserService service;
@@ -84,5 +85,26 @@ class UserServiceTest {
 
         then(repository).should().findById(10L);
         assertNotNull(user);
+    }
+
+    @Test
+    void testArgumentCaptor() {
+        service.createUser("Captor Test", "captor@email.com");
+
+        verify(repository).save(userCaptor.capture());
+        User captured = userCaptor.getValue();
+
+        assertEquals("Captor Test", captured.getName());
+    }
+
+    @Test
+    void testVerification() {
+        service.getUserById(1L);
+        service.getUserById(1L);
+        service.deleteUser(1L);
+
+        verify(repository, times(2)).findById(1L);
+        verify(repository, atLeastOnce()).deleteById(anyLong());
+        verify(repository, never()).save(any());
     }
 }
