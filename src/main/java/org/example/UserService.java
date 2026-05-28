@@ -1,5 +1,8 @@
 package org.example;
 
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(force = true)
 public class UserService {
     private final UserRepository repository;
 

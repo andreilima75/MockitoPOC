@@ -4,10 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -15,6 +17,9 @@ class UserServiceTest {
 
     @Mock
     private UserRepository repository;
+
+    @Spy
+    private UserService spyService;
 
     @InjectMocks
     private UserService service;
@@ -60,5 +65,24 @@ class UserServiceTest {
         assertEquals("First", service.getUserById(1L).getName());
         assertThrows(IllegalArgumentException.class, () -> service.getUserById(1L));
         assertEquals("Dynamic", service.getUserById(1L).getName());
+    }
+
+    @Test
+    void testSpy() {
+        doReturn(new User(1L, "Spy User", "spy@email.com"))
+                .when(spyService).getUserById(1L);
+
+        User user = spyService.getUserById(1L);
+        assertEquals("Spy User", user.getName());
+    }
+
+    @Test
+    void testBDDStyle() {
+        given(repository.findById(10L)).willReturn(new User(10L, "BDD", "bdd@test.com"));
+
+        User user = service.getUserById(10L);
+
+        then(repository).should().findById(10L);
+        assertNotNull(user);
     }
 }
