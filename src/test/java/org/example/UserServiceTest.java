@@ -5,6 +5,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -107,4 +109,33 @@ class UserServiceTest {
         verify(repository, atLeastOnce()).deleteById(anyLong());
         verify(repository, never()).save(any());
     }
+
+    @Test
+    void testStaticMock() {
+        UUID expectedUUID = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+
+        try (MockedStatic<UUID> mockedStatic = mockStatic(UUID.class)) {
+
+            mockedStatic.when(UUID::randomUUID)
+                    .thenReturn(expectedUUID);
+
+            User user = service.createUserWithRandomId("Andrei", "andrei@test.com");
+
+            assertEquals(expectedUUID.toString(), user.getName());
+        }
+    }
+
+    @Test
+    void testMockConstructor() {
+        try (MockedConstruction<User> mocked = mockConstruction(User.class,
+                (mock, context) -> {
+                    when(mock.getName()).thenReturn("Constructed User");
+                })) {
+
+            User user = new User();
+            assertEquals("Constructed User", user.getName());
+            assertEquals(1, mocked.constructed().size());
+        }
+    }
+
 }

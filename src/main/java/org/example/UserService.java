@@ -2,6 +2,8 @@ package org.example;
 
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @NoArgsConstructor(force = true)
 public class UserService {
     private final UserRepository repository;
@@ -23,5 +25,9 @@ public class UserService {
 
     public void deleteUser(Long id) {
         repository.deleteById(id);
+    }
+
+    public User createUserWithRandomId(String andrei, String mail) {
+        return new User(1L, UUID.randomUUID().toString(), "andrei.lima75@gmail.com");
     }
 }
