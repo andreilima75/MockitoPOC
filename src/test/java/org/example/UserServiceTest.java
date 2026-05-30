@@ -138,4 +138,16 @@ class UserServiceTest {
         }
     }
 
+    @Test
+    void testCustomAnswer() {
+        when(repository.save(any(User.class))).thenAnswer(invocation -> {
+            User u = invocation.getArgument(0);
+            u.setId(42L);
+            return u;
+        });
+
+        User saved = service.createUser("Answer", "answer@test.com");
+        assertEquals(42L, saved.getId());
+    }
+
 }
