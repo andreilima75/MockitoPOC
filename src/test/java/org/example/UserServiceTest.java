@@ -150,4 +150,10 @@ class UserServiceTest {
         assertEquals(42L, saved.getId());
     }
 
+    @Test
+    void testReset() {
+        when(repository.findById(1L)).thenReturn(new User());
+        reset(repository);
+    }
+
 }
